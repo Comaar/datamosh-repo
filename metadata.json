@@ -1,0 +1,7 @@
+{
+  "name": "Waterfall Datamosh Repo",
+  "description": "A fluid media repository featuring a falling waterfall of images and videos with a spacebar-triggered datamosh explosion effect.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
