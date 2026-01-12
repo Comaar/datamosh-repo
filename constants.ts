@@ -14,7 +14,7 @@ export const MEDIA_COLLECTION: Partial<MediaItemData>[] = [
   // { id: 'local-2', type: 'video', url: '/media/my-video.mp4' },
 
   // Current Cloud Samples
-  { id: '1', type: 'image', url: 'https://picsum.photos/id/10/400/600' },
+  { id: '1', type: 'image', url: '/Users/MarcoPiccolo/Desktop/GitHub_Projects/datamosh-repo/public/media/6F3B9312-3316-4D24-BD4E-040EDDF38AC6.JPG' },
   { id: '2', type: 'image', url: 'https://picsum.photos/id/20/500/300' },
   { id: '3', type: 'image', url: 'https://picsum.photos/id/30/450/700' },
   { id: '4', type: 'image', url: 'https://picsum.photos/id/40/600/400' },
