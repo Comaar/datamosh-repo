@@ -1,33 +1,27 @@
 
-# Flux Repository Deployment Guide
+# MARCO PICCOLO - Guida al Deploy su Vercel
 
-## 1. Local Development
-1. Open this folder in **VS Code**.
-2. Open the terminal (Ctrl+` or Cmd+`).
-3. Run `npm install` to install dependencies.
-4. Run `npm run dev` to start the local server.
-5. Visit `http://localhost:3000` in your browser.
+Questo sito è un repository multimediale con effetti di "Datamoshing" in tempo reale.
 
-## 2. Adding Your Own Files
-1. Create a folder named `public` in the root directory.
-2. Inside `public`, create a folder named `media`.
-3. Put your images and videos there.
-4. Open `constants.ts` and add them to `MEDIA_COLLECTION`:
+## 1. Caricare i tuoi file (Immagini e Video)
+Il sito è configurato per leggere i file dalla cartella `public`.
+1. Crea una cartella chiamata `public` nella cartella principale (root) del progetto.
+2. All'interno di `public`, crea una cartella chiamata `media`.
+3. Inserisci qui i tuoi file (es. `foto1.jpg`, `video1.mp4`).
+4. Apri `constants.ts` e aggiungi i file alla lista `MEDIA_COLLECTION`:
    ```ts
-   { id: 'unique-id', type: 'image', url: '/media/my-file.jpg' },
+   { id: 'mio-file', type: 'image', url: '/media/foto1.jpg' },
    ```
 
-## 3. Public Deployment (Free)
-### Option A: Vercel (Recommended)
-1. Push your code to a **GitHub** repository.
-2. Go to [Vercel.com](https://vercel.com).
-3. Click **"New Project"** and import your GitHub repo.
-4. Vercel will automatically detect Vite and deploy it.
+## 2. Pubblicazione su Vercel (Gratis)
+1. Carica la cartella del progetto su un nuovo repository **GitHub**.
+2. Vai su [Vercel.com](https://vercel.com) e accedi con il tuo account GitHub.
+3. Clicca su **"Add New"** > **"Project"**.
+4. Importa il repository appena creato.
+5. Clicca su **"Deploy"**.
 
-### Option B: Netlify
-1. Go to [Netlify.com](https://netlify.com).
-2. Drag and drop your project folder (after running `npm run build`, drop the `dist` folder) or connect to GitHub.
+Ogni volta che caricherai nuove foto su GitHub, Vercel aggiornerà il sito automaticamente in meno di un minuto.
 
-## 4. Controls
-- **Spacebar:** Trigger 7-second Datamosh Explosion.
-- **Left Click:** Anchor (Lock) an asset in position.
+## 3. Comandi e Interazioni
+- **Barra Spaziatrice:** Attiva l'effetto Datamosh (esplosione liquida dei pixel).
+- **Click su un elemento:** "Ancora" l'immagine o il video, bloccandolo nella sua posizione attuale.
