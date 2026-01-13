@@ -1,3 +1,4 @@
+
 import { MediaItemData } from './types';
 
 /**
@@ -76,4 +77,4 @@ export const MEDIA_COLLECTION: Partial<MediaItemData>[] = [
 ];
 
 export const EXPLOSION_DURATION = 4000; 
-export const BASE_FALL_SPEED = 1.5;
+export const BASE_FALL_SPEED = 0.5;

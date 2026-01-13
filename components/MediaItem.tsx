@@ -1,69 +1,68 @@
 
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { MediaItemData } from '../types';
 import { Anchor, AlertCircle } from 'lucide-react';
 
 interface Props {
   data: MediaItemData;
-  yOffset: number;
   isAnchored: boolean;
   onToggleAnchor: () => void;
 }
 
-export const MediaItem: React.FC<Props> = ({ data, yOffset, isAnchored, onToggleAnchor }) => {
+export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, onToggleAnchor }, ref) => {
   const [hasError, setHasError] = useState(false);
 
-  // We use a refined transition that handles the scale-up beautifully
-  // while keeping the waterfall movement (translate3d) performant.
-  const itemStyle: React.CSSProperties = {
+  // Outer container is moved by the WaterfallContainer ref
+  const outerStyle: React.CSSProperties = {
     position: 'absolute',
     left: `${data.initialX}%`,
     top: 0,
     width: data.width,
     height: data.height,
-    // Scale is slightly larger (1.8x) to make the 'bigger' effect more dramatic as requested
-    transform: `translate3d(0, ${yOffset}px, 0) scale(${isAnchored ? 1.8 : 1})`,
     zIndex: isAnchored ? 500 : Math.floor(data.parallax * 10),
-    // Using a specific bezier curve for that premium "pop" feel when anchoring
-    transition: isAnchored 
-      ? 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease' 
-      : 'transform 0.1s linear, box-shadow 0.2s ease', 
     pointerEvents: 'auto',
-    willChange: 'transform'
+    // We only apply translate3d here if it's NOT handled by the loop (e.g. first frame)
+    transform: 'translate3d(0, -1000px, 0)', 
   };
 
   return (
     <div 
+      ref={ref}
       onClick={(e) => {
         e.stopPropagation();
         onToggleAnchor();
       }}
-      className={`group cursor-pointer item-waterfall
-        ${isAnchored ? 'z-[500]' : 'hover:z-[150]'}`}
-      style={itemStyle}
+      className="item-waterfall group"
+      style={outerStyle}
     >
       <div 
-        className={`w-full h-full relative bg-zinc-900 shadow-2xl rounded-2xl overflow-hidden border-2 transition-all duration-500
-          ${isAnchored ? 'border-cyan-400 shadow-[0_0_80px_rgba(34,211,238,0.6)]' : 'border-white/5 group-hover:border-white/20'}`}
+        className={`w-full h-full relative bg-zinc-900 rounded-lg overflow-hidden border transition-all duration-700 ease-out
+          ${isAnchored 
+            ? 'border-cyan-400 scale-[1.7] z-[600] shadow-[0_0_50px_rgba(34,211,238,0.3)]' 
+            : 'border-white/10 scale-100 shadow-2xl group-hover:border-white/30'}`}
+        style={{
+          // Transition is ONLY for scale and effects, NOT for translation
+          transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.4s ease, box-shadow 0.4s ease'
+        }}
       >
         {isAnchored && (
-          <div className="absolute top-4 right-4 z-50 bg-cyan-400 text-black p-1.5 rounded-full shadow-xl animate-pulse">
-            <Anchor size={16} />
+          <div className="absolute top-3 right-3 z-50 bg-cyan-400 text-black p-1 rounded-full shadow-lg">
+            <Anchor size={12} />
           </div>
         )}
 
         {hasError ? (
-          <div className="w-full h-full flex items-center justify-center bg-zinc-950">
+          <div className="w-full h-full flex items-center justify-center bg-black">
             <AlertCircle className="text-red-500 opacity-20" size={24} />
           </div>
         ) : (
-          <div className="w-full h-full">
+          <div className="w-full h-full pointer-events-none">
             {data.type === 'image' ? (
               <img 
                 src={data.url} 
                 alt="" 
                 onError={() => setHasError(true)}
-                className="w-full h-full object-cover pointer-events-none"
+                className="w-full h-full object-cover"
                 loading="lazy"
               />
             ) : (
@@ -74,23 +73,22 @@ export const MediaItem: React.FC<Props> = ({ data, yOffset, isAnchored, onToggle
                 loop 
                 playsInline
                 onError={() => setHasError(true)}
-                className="w-full h-full object-cover pointer-events-none"
+                className="w-full h-full object-cover"
               />
             )}
           </div>
         )}
         
-        {/* Subtle Overlay to help items blend in when not focused */}
-        <div className={`absolute inset-0 transition-opacity duration-300 ${isAnchored ? 'opacity-0' : 'bg-black/10 opacity-0 group-hover:opacity-100'}`} />
-      </div>
-
-      {!isAnchored && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-[10px] font-mono text-white/0 group-hover:text-white/80 tracking-[0.5em] uppercase transition-all duration-300 translate-y-2 group-hover:translate-y-0 bg-black/60 px-3 py-1.5 rounded backdrop-blur-md">
-            VIEW
+        {/* Overlay hint */}
+        <div className={`absolute inset-0 transition-opacity duration-300 pointer-events-none flex items-center justify-center
+          ${isAnchored ? 'opacity-0' : 'opacity-0 group-hover:opacity-100 bg-black/40'}`}>
+           <span className="text-[10px] font-mono text-white tracking-widest uppercase border border-white/20 px-3 py-1 bg-black/50 backdrop-blur-sm">
+            Focus
           </span>
         </div>
-      )}
+      </div>
     </div>
   );
-};
+});
+
+MediaItem.displayName = 'MediaItem';

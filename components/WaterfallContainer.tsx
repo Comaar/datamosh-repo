@@ -3,12 +3,12 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { MediaItemData } from '../types';
 import { MediaItem } from './MediaItem';
 
-interface Slot {
-  id: string; // Unique slot ID
+interface SlotData {
+  id: string;
   y: number;
   x: number;
   speed: number;
-  mediaIndex: number; // Index into the items array
+  mediaIndex: number;
   parallax: number;
 }
 
@@ -18,25 +18,27 @@ interface Props {
   onToggleAnchor: (id: string) => void;
 }
 
-const SLOT_COUNT = 12; // Number of items visible/falling at once
+// User requested to start with 4 images
+const SLOT_COUNT = 4; 
 
 export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggleAnchor }) => {
-  const [slots, setSlots] = useState<Slot[]>([]);
-  const [queue, setQueue] = useState<number[]>([]);
-  
+  const [slots, setSlots] = useState<SlotData[]>([]);
+  const itemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const requestRef = useRef<number>(0);
   const lastTimeRef = useRef<number | undefined>(undefined);
+  
+  // Strict queue management
   const queueRef = useRef<number[]>([]);
+  const slotsRef = useRef<SlotData[]>([]);
   const itemsRef = useRef<MediaItemData[]>(items);
 
-  // Sync refs
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
 
-  // Helper to get a shuffled array of indices
   const getShuffledIndices = useCallback(() => {
     const indices = Array.from({ length: itemsRef.current.length }, (_, i) => i);
+    // Fisher-Yates shuffle
     for (let i = indices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [indices[i], indices[j]] = [indices[j], indices[i]];
@@ -44,84 +46,76 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
     return indices;
   }, []);
 
-  // Helper to get the next index from the queue, ensuring no duplicates if anchored
-  const getNextMediaIndex = useCallback((excludeMediaId?: string | null) => {
+  const getNextMediaIndex = useCallback(() => {
+    // If queue is empty, fill it with all available indices shuffled
     if (queueRef.current.length === 0) {
       queueRef.current = getShuffledIndices();
     }
-
-    let nextIdx = queueRef.current.shift()!;
-    
-    // If the next item is already anchored elsewhere, try to get another one 
-    // to avoid the same content appearing twice (once anchored, once falling)
-    if (excludeMediaId && itemsRef.current[nextIdx].id === excludeMediaId) {
-      if (queueRef.current.length === 0) {
-        queueRef.current = getShuffledIndices();
-      }
-      // Swap with next or just take next
-      const temp = nextIdx;
-      nextIdx = queueRef.current.shift()!;
-      queueRef.current.push(temp); // Put the excluded one back at the end
-    }
-
-    return nextIdx;
+    return queueRef.current.shift()!;
   }, [getShuffledIndices]);
 
-  // Initialize slots
+  // Initial slot setup
   useEffect(() => {
     if (items.length === 0) return;
     
-    // Fill initial queue
+    // Clear and refill initial queue
     queueRef.current = getShuffledIndices();
     
-    const initialSlots: Slot[] = Array.from({ length: SLOT_COUNT }, (_, i) => {
+    const initialSlots: SlotData[] = Array.from({ length: SLOT_COUNT }, (_, i) => {
       const mediaIdx = getNextMediaIndex();
-      const item = items[mediaIdx];
       return {
         id: `slot-${i}`,
-        y: (i * -400) - 200, // Staggered start
-        x: Math.random() * 85,
-        speed: 0.8 + Math.random() * 1.2,
+        // Stagger them vertically so they don't all appear at once
+        y: -300 - (i * 500), 
+        x: 5 + Math.random() * 75,
+        speed: 0.7 + Math.random() * 0.8, // Slightly faster base speed
         mediaIndex: mediaIdx,
-        parallax: 0.8 + Math.random() * 0.4,
+        parallax: 0.9 + Math.random() * 0.3,
       };
     });
     
+    slotsRef.current = initialSlots;
     setSlots(initialSlots);
   }, [items.length]);
 
   const animate = (time: number) => {
     if (lastTimeRef.current !== undefined) {
       const deltaTime = time - lastTimeRef.current;
-      const cappedDelta = Math.min(deltaTime, 32); 
-      
-      setSlots(prevSlots => {
-        return prevSlots.map(slot => {
-          const mediaItem = itemsRef.current[slot.mediaIndex];
-          
-          // If this slot is the one currently anchored, it stays still
-          if (mediaItem && mediaItem.id === anchoredId) {
-            return slot;
-          }
+      const cappedDelta = Math.min(deltaTime, 32);
 
-          const moveAmount = slot.speed * 0.18 * cappedDelta;
-          let newY = slot.y + moveAmount;
-          
-          // Reset logic
-          if (newY > 1200) {
-            const nextIdx = getNextMediaIndex(anchoredId);
-            return {
-              ...slot,
-              y: -600, // Reset to top
-              x: Math.random() * 85,
-              mediaIndex: nextIdx,
-              speed: 0.8 + Math.random() * 1.2,
-            };
-          }
-          
-          return { ...slot, y: newY };
-        });
+      const updatedSlots = [...slotsRef.current];
+      let hasResetted = false;
+
+      updatedSlots.forEach((slot) => {
+        const mediaItem = itemsRef.current[slot.mediaIndex];
+        const element = itemRefs.current[slot.id];
+        
+        if (!element || !mediaItem) return;
+
+        // Skip movement if anchored
+        if (mediaItem.id === anchoredId) return;
+
+        // Move DOWN (Y increases) - slightly increased multiplier from 0.04 to 0.065 for "slightly faster" feel
+        const moveAmount = slot.speed * 0.065 * cappedDelta;
+        slot.y += moveAmount;
+
+        // Reset if it goes past the bottom
+        if (slot.y > window.innerHeight + 400) {
+          slot.y = -600; // Reset well above the top
+          slot.x = 5 + Math.random() * 75;
+          slot.mediaIndex = getNextMediaIndex();
+          slot.speed = 0.7 + Math.random() * 0.8;
+          hasResetted = true;
+        }
+
+        // Apply transform directly to bypass React render for movement
+        element.style.transform = `translate3d(0, ${slot.y}px, 0)`;
       });
+
+      if (hasResetted) {
+        slotsRef.current = updatedSlots;
+        setSlots(updatedSlots);
+      }
     }
     lastTimeRef.current = time;
     requestRef.current = requestAnimationFrame(animate);
@@ -132,34 +126,29 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [anchoredId]);
+  }, [anchoredId, items.length]);
 
   return (
-    <div className="relative w-full h-full perspective-container">
+    <div className="relative w-full h-full perspective-container overflow-hidden bg-[#050505]">
       {slots.map((slot) => {
         const item = items[slot.mediaIndex];
         if (!item) return null;
-        
         return (
           <MediaItem 
             key={slot.id} 
-            data={{
-              ...item,
-              initialX: slot.x,
-              parallax: slot.parallax
-            }} 
-            yOffset={slot.y} 
+            ref={(el) => { itemRefs.current[slot.id] = el; }}
+            data={{ ...item, initialX: slot.x, parallax: slot.parallax }} 
             isAnchored={item.id === anchoredId}
             onToggleAnchor={() => onToggleAnchor(item.id)}
           />
         );
       })}
       
-      {/* Background Grid */}
+      {/* Background Ambience */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
         <div className="w-full h-full" style={{ 
           backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', 
-          backgroundSize: '120px 120px',
+          backgroundSize: '150px 150px',
         }}></div>
       </div>
     </div>
