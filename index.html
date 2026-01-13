@@ -29,7 +29,6 @@
       .animate-float {
         animation: float 3s ease-in-out infinite;
       }
-      /* Ensure no transitions interfere with the waterfall reset */
       .item-waterfall {
         transition: opacity 0.5s ease;
       }
@@ -40,9 +39,9 @@
   <script type="importmap">
 {
   "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "vite": "https://esm.sh/vite@^7.3.1",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
@@ -52,29 +51,23 @@
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
 
     <!-- Enhanced Datamosh SVG Filter Stack -->
     <svg style="position: absolute; width: 0; height: 0;" width="0" height="0">
       <defs>
         <filter id="datamosh-glitch" x="-50%" y="-50%" width="200%" height="200%">
-          <!-- Phase 1: Heavy Displacement (Pixels pulling apart) -->
           <feTurbulence type="fractalNoise" baseFrequency="0.015 0.002" numOctaves="3" seed="2" result="noise1">
             <animate attributeName="seed" values="1;50;1" dur="7s" repeatCount="indefinite" />
           </feTurbulence>
           <feDisplacementMap in="SourceGraphic" in2="noise1" scale="0" xChannelSelector="R" yChannelSelector="G" result="mosh1">
             <animate attributeName="scale" values="0;180;100;50;0" dur="7s" fill="freeze" />
           </feDisplacementMap>
-          
-          <!-- Phase 2: Color Bleed -->
           <feColorMatrix in="mosh1" type="matrix" values="1.2 0 0 0 0  0 1 0 0 0  0 0 1.5 0 0  0 0 0 1 0" result="colors" />
-          
-          <!-- Phase 3: Secondary Turbulence for "Liquid" feel -->
           <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise2" />
           <feDisplacementMap in="colors" in2="noise2" scale="0" xChannelSelector="A" yChannelSelector="B" result="mosh2">
              <animate attributeName="scale" values="0;40;80;20;0" dur="7s" fill="freeze" />
           </feDisplacementMap>
-          
-          <!-- Edge sharpening to keep it from just being a blur -->
           <feConvolveMatrix order="3" kernelMatrix="0 -1 0 -1 5 -1 0 -1 0" in="mosh2" />
         </filter>
       </defs>

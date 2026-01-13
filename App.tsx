@@ -3,11 +3,12 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { WaterfallContainer } from './components/WaterfallContainer';
 import { MEDIA_COLLECTION, EXPLOSION_DURATION } from './constants';
 import { MediaItemData, WaterfallState } from './types';
-import { Info, Share2, Command, Anchor } from 'lucide-react';
+import { Info, Share2, Command } from 'lucide-react';
 
 const generateInitialItems = (): MediaItemData[] => {
   return MEDIA_COLLECTION.map((item, index) => ({
     ...item,
+    id: item.id || `item-${index}`,
     width: item.type === 'video' ? 320 : 200 + Math.random() * 200,
     height: item.type === 'video' ? 180 : 250 + Math.random() * 300,
     initialX: Math.random() * 90,
@@ -18,9 +19,19 @@ const generateInitialItems = (): MediaItemData[] => {
 };
 
 const App: React.FC = () => {
-  const [items, setItems] = useState<MediaItemData[]>(generateInitialItems());
+  const [items, setItems] = useState<MediaItemData[]>([]);
   const [state, setState] = useState<WaterfallState>({ isExploding: false, isRecovering: false });
   const timeoutRef = useRef<any>(null);
+
+  useEffect(() => {
+    const initializedItems = generateInitialItems();
+    console.log('App: Media Registry Booted');
+    console.log('App: Initialized items count:', initializedItems.length);
+    initializedItems.forEach(item => {
+      console.log(`Asset ID: ${item.id} | Type: ${item.type} | URL: ${item.url}`);
+    });
+    setItems(initializedItems);
+  }, []);
 
   const toggleLock = useCallback((id: string) => {
     setItems(prev => prev.map(item => 
@@ -30,14 +41,10 @@ const App: React.FC = () => {
 
   const triggerExplosion = useCallback(() => {
     if (state.isExploding) return;
-
     setState({ isExploding: true, isRecovering: false });
-
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    
     timeoutRef.current = setTimeout(() => {
       setState({ isExploding: false, isRecovering: true });
-      
       setTimeout(() => {
         setState(prev => ({ ...prev, isRecovering: false }));
       }, 1500);
@@ -51,21 +58,19 @@ const App: React.FC = () => {
         triggerExplosion();
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [triggerExplosion]);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black select-none">
-      {/* UI Overlay */}
       <header className="fixed top-0 left-0 w-full z-50 p-6 flex justify-between items-start pointer-events-none">
         <div className="pointer-events-auto">
           <h1 className="text-4xl font-black tracking-tighter uppercase italic text-white/90 mix-blend-difference">
             Flux Repository
           </h1>
           <p className="text-xs font-mono uppercase text-white/40 mt-1">
-            v3.0.0-anchor // protocol_live
+            v3.1.2-anchor // protocol_debug_active
           </p>
         </div>
         
@@ -79,10 +84,10 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Experience */}
-      <WaterfallContainer items={items} state={state} onToggleLock={toggleLock} />
+      {items.length > 0 && (
+        <WaterfallContainer items={items} state={state} onToggleLock={toggleLock} />
+      )}
 
-      {/* Footer / Instructions */}
       <footer className="fixed bottom-0 left-0 w-full z-50 p-8 flex flex-col md:flex-row justify-between items-end pointer-events-none">
         <div className="max-w-xs space-y-2 pointer-events-auto bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-white/5">
           <div className="flex items-center gap-2 text-white/60">
@@ -105,7 +110,6 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      {/* Flash effect when exploding */}
       {state.isExploding && (
         <div className="absolute inset-0 z-40 pointer-events-none animate-pulse bg-cyan-500/5 mix-blend-screen" />
       )}

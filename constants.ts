@@ -3,18 +3,21 @@ import { MediaItemData } from './types';
 
 /**
  * INSTRUCTIONS FOR ADDING YOUR OWN MEDIA:
- * 1. Create a folder named 'public/media' in your project root.
- * 2. Drop your images and videos into that folder.
- * 3. Add them to the list below using the path '/media/your-file-name.ext'.
+ * 1. Create a folder named 'public' in your project root.
+ * 2. Create a folder named 'media' inside 'public'.
+ * 3. Drop your images/videos into 'public/media/'.
+ * 4. Use the relative path '/media/filename.ext' below.
  */
 
 export const MEDIA_COLLECTION: Partial<MediaItemData>[] = [
-  // Example of local files (Add yours here)
-  // { id: 'local-1', type: 'image', url: '/media/my-photo.jpg' },
-  // { id: 'local-2', type: 'video', url: '/media/my-video.mp4' },
+  // CORRECTED: This uses the relative path served by the web server
+  { id: 'user-asset-1', type: 'image', url: '/media/6F3B9312-3316-4D24-BD4E-040EDDF38AC6.JPG' },
+  
+  // Placeholder for your other local files
+  // { id: 'local-video', type: 'video', url: '/media/my-video.mp4' },
 
-  // Current Cloud Samples
-  { id: '1', type: 'image', url: '/Users/MarcoPiccolo/Desktop/GitHub_Projects/datamosh-repo/public/media/6F3B9312-3316-4D24-BD4E-040EDDF38AC6.JPG' },
+  // Cloud Samples
+  { id: '1', type: 'image', url: 'https://picsum.photos/id/10/400/600' },
   { id: '2', type: 'image', url: 'https://picsum.photos/id/20/500/300' },
   { id: '3', type: 'image', url: 'https://picsum.photos/id/30/450/700' },
   { id: '4', type: 'image', url: 'https://picsum.photos/id/40/600/400' },
