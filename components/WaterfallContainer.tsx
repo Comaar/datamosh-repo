@@ -19,10 +19,9 @@ interface Props {
 }
 
 /**
- * Crowded setup: 10 slots ensures there are always multiple items on screen.
- * Even when 1 or 2 are resetting at the top, many remain in view.
+ * Super crowded setup: 18 slots creates a dense "wall" of falling media.
  */
-const SLOT_COUNT = 10; 
+const SLOT_COUNT = 18; 
 
 export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggleAnchor }) => {
   const [slots, setSlots] = useState<SlotData[]>([]);
@@ -30,7 +29,6 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
   const requestRef = useRef<number>(0);
   const lastTimeRef = useRef<number | undefined>(undefined);
   
-  // Strict queue management
   const queueRef = useRef<number[]>([]);
   const slotsRef = useRef<SlotData[]>([]);
   const itemsRef = useRef<MediaItemData[]>(items);
@@ -41,7 +39,6 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
 
   const getShuffledIndices = useCallback(() => {
     const indices = Array.from({ length: itemsRef.current.length }, (_, i) => i);
-    // Fisher-Yates shuffle
     for (let i = indices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [indices[i], indices[j]] = [indices[j], indices[i]];
@@ -50,31 +47,26 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
   }, []);
 
   const getNextMediaIndex = useCallback(() => {
-    // If queue is empty, fill it with all available indices shuffled
     if (queueRef.current.length === 0) {
       queueRef.current = getShuffledIndices();
     }
     return queueRef.current.shift()!;
   }, [getShuffledIndices]);
 
-  // Initial slot setup
   useEffect(() => {
     if (items.length === 0) return;
     
-    // Clear and refill initial queue
+    // Fill initial queue
     queueRef.current = getShuffledIndices();
     
     const initialSlots: SlotData[] = Array.from({ length: SLOT_COUNT }, (_, i) => {
       const mediaIdx = getNextMediaIndex();
       return {
         id: `slot-${i}`,
-        /**
-         * Reduced stagger (350 instead of 700) to keep items vertically closer.
-         * This creates the "crowded" look.
-         */
-        y: -400 - (i * 350), 
-        x: Math.random() * 75,
-        speed: 0.8 + Math.random() * 0.7, 
+        // Dense vertical packing: 280px gap keeps them very close
+        y: -500 - (i * 280), 
+        x: Math.random() * 80,
+        speed: 0.8 + Math.random() * 0.9, 
         mediaIndex: mediaIdx,
         parallax: 0.9 + Math.random() * 0.3,
       };
@@ -97,25 +89,21 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
         const element = itemRefs.current[slot.id];
         
         if (!element || !mediaItem) return;
-
-        // Skip movement if anchored
         if (mediaItem.id === anchoredId) return;
 
-        // Move DOWN (Y increases)
-        // Multiplier set to 0.08 for a dense but energetic flow
-        const moveAmount = slot.speed * 0.08 * cappedDelta;
+        // Falling speed
+        const moveAmount = slot.speed * 0.085 * cappedDelta;
         slot.y += moveAmount;
 
-        // Reset if it goes past the bottom
+        // Recycle slots
         if (slot.y > window.innerHeight + 800) {
-          slot.y = -900; 
-          slot.x = Math.random() * 75;
+          slot.y = -1000; 
+          slot.x = Math.random() * 80;
           slot.mediaIndex = getNextMediaIndex();
-          slot.speed = 0.8 + Math.random() * 0.7;
+          slot.speed = 0.8 + Math.random() * 0.9;
           hasResetted = true;
         }
 
-        // Apply transform directly to bypass React render for movement
         element.style.transform = `translate3d(0, ${slot.y}px, 0)`;
       });
 
@@ -151,11 +139,10 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
         );
       })}
       
-      {/* Background Ambience */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
         <div className="w-full h-full" style={{ 
           backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', 
-          backgroundSize: '200px 200px',
+          backgroundSize: '150px 150px',
         }}></div>
       </div>
     </div>
