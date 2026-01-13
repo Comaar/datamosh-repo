@@ -32,17 +32,17 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
         e.stopPropagation();
         onToggleAnchor();
       }}
-      className="item-waterfall group"
+      className="item-waterfall group cursor-pointer"
       style={outerStyle}
     >
       <div 
         className={`w-full h-full relative bg-zinc-900 rounded-lg overflow-hidden border transition-all duration-700 ease-out
           ${isAnchored 
-            ? 'border-cyan-400 scale-[1.7] z-[600] shadow-[0_0_50px_rgba(34,211,238,0.3)]' 
+            ? 'border-cyan-400 scale-100 z-[600] shadow-[0_0_50px_rgba(34,211,238,0.3)]' 
             : 'border-white/10 scale-100 shadow-2xl group-hover:border-white/30'}`}
         style={{
-          // Transition is ONLY for scale and effects, NOT for translation
-          transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.4s ease, box-shadow 0.4s ease'
+          // Removed scale-based zooming, keeping transitions for border and shadow
+          transition: 'border-color 0.4s ease, box-shadow 0.4s ease'
         }}
       >
         {isAnchored && (
@@ -78,14 +78,6 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
             )}
           </div>
         )}
-        
-        {/* Overlay hint */}
-        <div className={`absolute inset-0 transition-opacity duration-300 pointer-events-none flex items-center justify-center
-          ${isAnchored ? 'opacity-0' : 'opacity-0 group-hover:opacity-100 bg-black/40'}`}>
-           <span className="text-[10px] font-mono text-white tracking-widest uppercase border border-white/20 px-3 py-1 bg-black/50 backdrop-blur-sm">
-            Focus
-          </span>
-        </div>
       </div>
     </div>
   );
