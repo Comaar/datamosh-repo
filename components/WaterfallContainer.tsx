@@ -18,8 +18,11 @@ interface Props {
   onToggleAnchor: (id: string) => void;
 }
 
-// User requested to start with 4 images
-const SLOT_COUNT = 4; 
+/**
+ * Crowded setup: 10 slots ensures there are always multiple items on screen.
+ * Even when 1 or 2 are resetting at the top, many remain in view.
+ */
+const SLOT_COUNT = 10; 
 
 export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggleAnchor }) => {
   const [slots, setSlots] = useState<SlotData[]>([]);
@@ -65,10 +68,13 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
       const mediaIdx = getNextMediaIndex();
       return {
         id: `slot-${i}`,
-        // Increased vertical stagger from 500 to 700 to accommodate bigger items
-        y: -400 - (i * 700), 
-        x: 5 + Math.random() * 70, // Slightly narrower X range to keep bigger items from clipping sides too much
-        speed: 0.7 + Math.random() * 0.8, 
+        /**
+         * Reduced stagger (350 instead of 700) to keep items vertically closer.
+         * This creates the "crowded" look.
+         */
+        y: -400 - (i * 350), 
+        x: Math.random() * 75,
+        speed: 0.8 + Math.random() * 0.7, 
         mediaIndex: mediaIdx,
         parallax: 0.9 + Math.random() * 0.3,
       };
@@ -96,15 +102,16 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
         if (mediaItem.id === anchoredId) return;
 
         // Move DOWN (Y increases)
-        const moveAmount = slot.speed * 0.065 * cappedDelta;
+        // Multiplier set to 0.08 for a dense but energetic flow
+        const moveAmount = slot.speed * 0.08 * cappedDelta;
         slot.y += moveAmount;
 
-        // Reset if it goes past the bottom (increased threshold for larger items)
+        // Reset if it goes past the bottom
         if (slot.y > window.innerHeight + 800) {
-          slot.y = -900; // Reset well above the top
-          slot.x = 5 + Math.random() * 70;
+          slot.y = -900; 
+          slot.x = Math.random() * 75;
           slot.mediaIndex = getNextMediaIndex();
-          slot.speed = 0.7 + Math.random() * 0.8;
+          slot.speed = 0.8 + Math.random() * 0.7;
           hasResetted = true;
         }
 
