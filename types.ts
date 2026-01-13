@@ -14,6 +14,5 @@ export interface MediaItemData {
 }
 
 export interface WaterfallState {
-  isExploding: boolean;
-  isRecovering: boolean;
+  anchoredId: string | null;
 }

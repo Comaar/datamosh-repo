@@ -1,67 +1,54 @@
-import React, { useMemo, useState } from 'react';
+
+import React, { useState } from 'react';
 import { MediaItemData } from '../types';
 import { Anchor, AlertCircle } from 'lucide-react';
 
 interface Props {
   data: MediaItemData;
   yOffset: number;
-  isExploding: boolean;
-  onToggleLock: () => void;
+  isAnchored: boolean;
+  onToggleAnchor: () => void;
 }
 
-export const MediaItem: React.FC<Props> = ({ data, yOffset, isExploding, onToggleLock }) => {
+export const MediaItem: React.FC<Props> = ({ data, yOffset, isAnchored, onToggleAnchor }) => {
   const [hasError, setHasError] = useState(false);
 
-  const explosionTransform = useMemo(() => {
-    if (data.isLocked) {
-      return `translate3d(0px, ${yOffset}px, 0px) rotate(0deg)`;
-    }
-    const seed = data.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    
-    // Extreme downward travel for the cascade run
-    const tx = (Math.sin(seed) * 12); 
-    const ty = yOffset + 4000; 
-    const r = (Math.sin(seed) * 6);
-    
-    return `translate3d(${tx}px, ${ty}px, 0px) rotate(${r}deg)`;
-  }, [data.id, data.isLocked, yOffset]);
-
+  // We use a refined transition that handles the scale-up beautifully
+  // while keeping the waterfall movement (translate3d) performant.
   const itemStyle: React.CSSProperties = {
     position: 'absolute',
     left: `${data.initialX}%`,
     top: 0,
     width: data.width,
     height: data.height,
-    transform: isExploding 
-      ? explosionTransform 
-      : `translate3d(0, ${yOffset}px, 0)`,
-    zIndex: data.isLocked ? 100 : Math.floor(data.parallax * 10),
-    // Overflow visible is key: the parent container lets the filter results "bleed" out
-    overflow: 'visible', 
-    filter: isExploding && !data.isLocked ? 'url(#pixel-cascade-filter)' : 'none',
+    // Scale is slightly larger (1.8x) to make the 'bigger' effect more dramatic as requested
+    transform: `translate3d(0, ${yOffset}px, 0) scale(${isAnchored ? 1.8 : 1})`,
+    zIndex: isAnchored ? 500 : Math.floor(data.parallax * 10),
+    // Using a specific bezier curve for that premium "pop" feel when anchoring
+    transition: isAnchored 
+      ? 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease' 
+      : 'transform 0.1s linear, box-shadow 0.2s ease', 
+    pointerEvents: 'auto',
+    willChange: 'transform'
   };
 
   return (
     <div 
       onClick={(e) => {
         e.stopPropagation();
-        onToggleLock();
+        onToggleAnchor();
       }}
-      className={`group cursor-pointer transition-opacity duration-500
-        ${data.isLocked ? 'ring-2 ring-cyan-400 z-[100] rounded-2xl' : ''}
-        ${isExploding ? 'item-exploding mosh-pixelated animate-pixel-jitter' : 'item-waterfall'}`}
+      className={`group cursor-pointer item-waterfall
+        ${isAnchored ? 'z-[500]' : 'hover:z-[150]'}`}
       style={itemStyle}
     >
       <div 
-        className="w-full h-full relative bg-zinc-900 shadow-2xl rounded-2xl overflow-hidden"
-        style={{ 
-          // Internal secondary filter for texture mixing
-          filter: isExploding && !data.isLocked ? 'url(#pixel-mix-filter)' : 'none' 
-        }}
+        className={`w-full h-full relative bg-zinc-900 shadow-2xl rounded-2xl overflow-hidden border-2 transition-all duration-500
+          ${isAnchored ? 'border-cyan-400 shadow-[0_0_80px_rgba(34,211,238,0.6)]' : 'border-white/5 group-hover:border-white/20'}`}
       >
-        {data.isLocked && (
-          <div className="absolute top-4 right-4 z-50 bg-cyan-400 text-black p-1.5 rounded-full shadow-xl">
-            <Anchor size={14} />
+        {isAnchored && (
+          <div className="absolute top-4 right-4 z-50 bg-cyan-400 text-black p-1.5 rounded-full shadow-xl animate-pulse">
+            <Anchor size={16} />
           </div>
         )}
 
@@ -90,18 +77,17 @@ export const MediaItem: React.FC<Props> = ({ data, yOffset, isExploding, onToggl
                 className="w-full h-full object-cover pointer-events-none"
               />
             )}
-            
-            {isExploding && !data.isLocked && (
-               <div className="absolute inset-0 bg-cyan-400/10 mix-blend-color animate-pulse" />
-            )}
           </div>
         )}
+        
+        {/* Subtle Overlay to help items blend in when not focused */}
+        <div className={`absolute inset-0 transition-opacity duration-300 ${isAnchored ? 'opacity-0' : 'bg-black/10 opacity-0 group-hover:opacity-100'}`} />
       </div>
 
-      {!isExploding && !data.isLocked && (
+      {!isAnchored && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-[8px] font-mono text-white/0 group-hover:text-white/30 tracking-[0.5em] uppercase transition-all">
-            LOCKED
+          <span className="text-[10px] font-mono text-white/0 group-hover:text-white/80 tracking-[0.5em] uppercase transition-all duration-300 translate-y-2 group-hover:translate-y-0 bg-black/60 px-3 py-1.5 rounded backdrop-blur-md">
+            VIEW
           </span>
         </div>
       )}

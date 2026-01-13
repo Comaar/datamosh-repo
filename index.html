@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -21,38 +22,23 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
-      
-      .mosh-pixelated {
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-      }
-
-      @keyframes pixel-jitter {
-        0% { transform: translate(0, 0); }
-        50% { transform: translate(-3px, 3px); }
-        100% { transform: translate(0, 0); }
-      }
-
-      .animate-pixel-jitter {
-        animation: pixel-jitter 0.08s steps(1) infinite;
-      }
 
       .item-waterfall {
         will-change: transform;
-      }
-      
-      .item-exploding {
-        transition: transform 4s cubic-bezier(0.1, 0, 0.2, 1);
-        will-change: transform;
+        transition: transform 0.3s ease-out, scale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
 
       .scanlines {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
         background-size: 100% 4px;
         pointer-events: none;
         z-index: 60;
+      }
+      
+      .perspective-container {
+        perspective: 1000px;
       }
     </style>
   <script type="importmap">
@@ -72,25 +58,5 @@
     <div id="root"></div>
     <div class="scanlines"></div>
     <script type="module" src="/index.tsx"></script>
-
-    <svg style="position: absolute; width: 0; height: 0;" width="0" height="0">
-      <defs>
-        <!-- High-Bleed Vertical Cascade: Large filter region allows pixels to invade screen -->
-        <filter id="pixel-cascade-filter" x="-200%" y="-400%" width="500%" height="1000%" filterUnits="objectBoundingBox">
-          <feTurbulence type="fractalNoise" baseFrequency="0.015 0.0008" numOctaves="1" seed="1" result="noise">
-            <animate attributeName="seed" values="1;800;1" dur="0.25s" repeatCount="indefinite" />
-          </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="600" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-
-        <!-- Faster mix for internal content -->
-        <filter id="pixel-mix-filter">
-          <feTurbulence type="turbulence" baseFrequency="0.6" numOctaves="1" result="mixNoise">
-             <animate attributeName="seed" values="1;300" dur="0.1s" repeatCount="indefinite" />
-          </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="mixNoise" scale="35" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-      </defs>
-    </svg>
   </body>
 </html>
