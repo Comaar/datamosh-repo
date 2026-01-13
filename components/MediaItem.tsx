@@ -38,15 +38,14 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
       <div 
         className={`w-full h-full relative bg-zinc-900 rounded-lg overflow-hidden border transition-all duration-700 ease-out
           ${isAnchored 
-            ? 'border-cyan-400 scale-100 z-[600] shadow-[0_0_50px_rgba(34,211,238,0.3)]' 
+            ? 'border-[#FF6B00] scale-100 z-[600] shadow-[0_0_50px_rgba(255,107,0,0.3)]' 
             : 'border-white/10 scale-100 shadow-2xl group-hover:border-white/30'}`}
         style={{
-          // Removed scale-based zooming, keeping transitions for border and shadow
           transition: 'border-color 0.4s ease, box-shadow 0.4s ease'
         }}
       >
         {isAnchored && (
-          <div className="absolute top-3 right-3 z-50 bg-cyan-400 text-black p-1 rounded-full shadow-lg">
+          <div className="absolute top-3 right-3 z-50 bg-[#FF6B00] text-black p-1 rounded-full shadow-lg">
             <Anchor size={12} />
           </div>
         )}

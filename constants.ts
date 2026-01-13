@@ -73,7 +73,7 @@ export const MEDIA_COLLECTION: Partial<MediaItemData>[] = [
   { id: 'media-52', type: 'image', url: '/media/P1097223.JPG' },
   { id: 'media-53', type: 'image', url: '/media/b1abdbcb-24e7-4f14-ac54-7adc603ab383.JPG' },
   { id: 'media-54', type: 'image', url: '/media/c1854a63-0ea3-4c1f-814f-3d03bcb036a9.JPG' },
-  { id: 'media-55', type: 'image', url: '/media/802ca565-9f31-4650-80c9-8422a0cfb8ed.JPG' },
+
 ];
 
 export const EXPLOSION_DURATION = 4000; 
