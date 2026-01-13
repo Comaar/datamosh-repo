@@ -19,9 +19,9 @@ const App: React.FC = () => {
       
       // Sizing logic: 
       // Videos are the largest (landscape 16:9 feel)
-      // Images are "a bit bigger" than previous versions but still smaller than videos
-      const width = isVideo ? 760 : 360 + (index % 3) * 40; 
-      const height = isVideo ? 428 : 480 + (index % 3) * 60;
+      // Images are "slightly smaller" than before
+      const width = isVideo ? 760 : 280 + (index % 3) * 30; 
+      const height = isVideo ? 428 : 380 + (index % 3) * 40;
 
       return {
         ...item,

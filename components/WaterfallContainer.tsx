@@ -19,9 +19,9 @@ interface Props {
 }
 
 /**
- * Super crowded setup: 18 slots creates a dense "wall" of falling media.
+ * Reduced density: 8 slots ensure a cleaner view where never too many images are visible at once.
  */
-const SLOT_COUNT = 18; 
+const SLOT_COUNT = 8; 
 
 export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggleAnchor }) => {
   const [slots, setSlots] = useState<SlotData[]>([]);
@@ -63,10 +63,10 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
       const mediaIdx = getNextMediaIndex();
       return {
         id: `slot-${i}`,
-        // Dense vertical packing: 280px gap keeps them very close
-        y: -500 - (i * 280), 
-        x: Math.random() * 80,
-        speed: 0.8 + Math.random() * 0.9, 
+        // Distribute items vertically with comfortable spacing
+        y: -600 - (i * 450), 
+        x: 5 + Math.random() * 70, // Slight margin to keep away from edges
+        speed: 0.8 + Math.random() * 0.7, 
         mediaIndex: mediaIdx,
         parallax: 0.9 + Math.random() * 0.3,
       };
@@ -74,7 +74,7 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
     
     slotsRef.current = initialSlots;
     setSlots(initialSlots);
-  }, [items.length]);
+  }, [items.length, getNextMediaIndex, getShuffledIndices]);
 
   const animate = (time: number) => {
     if (lastTimeRef.current !== undefined) {
@@ -92,15 +92,15 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
         if (mediaItem.id === anchoredId) return;
 
         // Falling speed
-        const moveAmount = slot.speed * 0.085 * cappedDelta;
+        const moveAmount = slot.speed * 0.08 * cappedDelta;
         slot.y += moveAmount;
 
         // Recycle slots
-        if (slot.y > window.innerHeight + 800) {
+        if (slot.y > window.innerHeight + 1200) {
           slot.y = -1000; 
-          slot.x = Math.random() * 80;
+          slot.x = 5 + Math.random() * 70;
           slot.mediaIndex = getNextMediaIndex();
-          slot.speed = 0.8 + Math.random() * 0.9;
+          slot.speed = 0.8 + Math.random() * 0.7;
           hasResetted = true;
         }
 
@@ -121,7 +121,7 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [anchoredId, items.length]);
+  }, [anchoredId]);
 
   return (
     <div className="relative w-full h-full perspective-container overflow-hidden bg-[#050505]">
