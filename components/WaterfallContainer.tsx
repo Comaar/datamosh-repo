@@ -19,9 +19,10 @@ interface Props {
 }
 
 /**
- * Reduced density: 8 slots ensure a cleaner view where never too many images are visible at once.
+ * Strict density: 7 slots ensures we stay close to the "max 6 images" rule 
+ * especially when mixed with larger video slots.
  */
-const SLOT_COUNT = 8; 
+const SLOT_COUNT = 7; 
 
 export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggleAnchor }) => {
   const [slots, setSlots] = useState<SlotData[]>([]);

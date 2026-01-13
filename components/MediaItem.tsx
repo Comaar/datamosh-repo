@@ -12,6 +12,9 @@ interface Props {
 export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, onToggleAnchor }, ref) => {
   const [hasError, setHasError] = useState(false);
 
+  // Extract filename from the URL
+  const filename = data.url.split('/').pop() || 'Untitled';
+
   // Outer container is moved by the WaterfallContainer ref
   const outerStyle: React.CSSProperties = {
     position: 'absolute',
@@ -49,6 +52,13 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
             <Anchor size={12} />
           </div>
         )}
+
+        {/* Filename Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-white/80 truncate block">
+            {filename}
+          </span>
+        </div>
 
         {hasError ? (
           <div className="w-full h-full flex items-center justify-center bg-black">
