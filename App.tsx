@@ -18,10 +18,10 @@ const App: React.FC = () => {
       const isVideo = url.endsWith('.mp4') || url.endsWith('.mov') || item.type === 'video';
       
       // Sizing logic: 
-      // Videos are bigger (landscape 16:9 or similar)
-      // Images are smaller
-      const width = isVideo ? 640 : 220 + (index % 4) * 40;
-      const height = isVideo ? 360 : 280 + (index % 3) * 60;
+      // Videos are the largest (landscape 16:9 feel)
+      // Images are "a bit bigger" than previous versions but still smaller than videos
+      const width = isVideo ? 760 : 360 + (index % 3) * 40; 
+      const height = isVideo ? 428 : 480 + (index % 3) * 60;
 
       return {
         ...item,
@@ -78,16 +78,10 @@ const App: React.FC = () => {
     <div className="relative w-full h-screen overflow-hidden bg-black select-none">
       {!isReady && (
         <div className="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center transition-opacity duration-1000">
-          <img 
-            src="/favicon.png" 
-            alt="Seabass Logo" 
-            className="w-24 h-24 object-contain mb-8 animate-pulse"
-            onError={(e) => (e.currentTarget.style.display = 'none')}
-          />
-          <div className="text-white font-black text-4xl italic tracking-tighter mb-4 uppercase">
+          <div className="text-white font-black text-5xl italic tracking-tighter mb-6 uppercase">
             MARCO PICCOLO
           </div>
-          <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+          <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
             <div 
               className="h-full bg-[#FF6B00] transition-all duration-300" 
               style={{ width: `${(loadCount / totalToPreload) * 100}%` }}
@@ -101,11 +95,6 @@ const App: React.FC = () => {
 
       <header className="fixed top-0 left-0 w-full z-[100] p-10 flex flex-col justify-start items-start pointer-events-none">
         <div className="pointer-events-auto flex flex-col items-start">
-          <img 
-            src="/favicon.png" 
-            alt="Favicon" 
-            className="w-8 h-8 object-contain mb-4 mix-blend-screen opacity-70"
-          />
           <h1 className="text-6xl font-black tracking-tighter uppercase italic text-white/95 mix-blend-difference">
             MARCO PICCOLO
           </h1>
