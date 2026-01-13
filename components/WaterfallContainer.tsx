@@ -11,8 +11,10 @@ interface Props {
 
 export const WaterfallContainer: React.FC<Props> = ({ items, state, onToggleLock }) => {
   const [offsets, setOffsets] = useState<number[]>(new Array(items.length).fill(-100));
-  const requestRef = useRef<number>();
-  const lastTimeRef = useRef<number>(0);
+  // Fix: Provide initial value 0 to satisfy useRef signature requiring 1 argument in strict environments
+  const requestRef = useRef<number>(0);
+  // Fix: Provide initial value undefined to satisfy useRef signature and match the undefined check logic in animate
+  const lastTimeRef = useRef<number | undefined>(undefined);
 
   const animate = (time: number) => {
     if (lastTimeRef.current !== undefined && !state.isExploding) {
