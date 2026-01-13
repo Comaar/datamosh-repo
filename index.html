@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flux Repository | Datamosh</title>
+    <title>MARCO PICCOLO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
@@ -21,18 +21,38 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
-      @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
+      
+      .mosh-pixelated {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
       }
-      .animate-float {
-        animation: float 3s ease-in-out infinite;
+
+      @keyframes pixel-jitter {
+        0% { transform: translate(0, 0); }
+        50% { transform: translate(-3px, 3px); }
+        100% { transform: translate(0, 0); }
       }
+
+      .animate-pixel-jitter {
+        animation: pixel-jitter 0.08s steps(1) infinite;
+      }
+
       .item-waterfall {
-        transition: opacity 0.5s ease;
+        will-change: transform;
       }
+      
       .item-exploding {
-        transition: transform 7s cubic-bezier(0.075, 0.82, 0.165, 1), opacity 1s, filter 0.5s;
+        transition: transform 4s cubic-bezier(0.1, 0, 0.2, 1);
+        will-change: transform;
+      }
+
+      .scanlines {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+        background-size: 100% 4px;
+        pointer-events: none;
+        z-index: 60;
       }
     </style>
   <script type="importmap">
@@ -50,24 +70,25 @@
 </head>
   <body>
     <div id="root"></div>
+    <div class="scanlines"></div>
     <script type="module" src="/index.tsx"></script>
 
-    <!-- Enhanced Datamosh SVG Filter Stack -->
     <svg style="position: absolute; width: 0; height: 0;" width="0" height="0">
       <defs>
-        <filter id="datamosh-glitch" x="-50%" y="-50%" width="200%" height="200%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.015 0.002" numOctaves="3" seed="2" result="noise1">
-            <animate attributeName="seed" values="1;50;1" dur="7s" repeatCount="indefinite" />
+        <!-- High-Bleed Vertical Cascade: Large filter region allows pixels to invade screen -->
+        <filter id="pixel-cascade-filter" x="-200%" y="-400%" width="500%" height="1000%" filterUnits="objectBoundingBox">
+          <feTurbulence type="fractalNoise" baseFrequency="0.015 0.0008" numOctaves="1" seed="1" result="noise">
+            <animate attributeName="seed" values="1;800;1" dur="0.25s" repeatCount="indefinite" />
           </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="noise1" scale="0" xChannelSelector="R" yChannelSelector="G" result="mosh1">
-            <animate attributeName="scale" values="0;180;100;50;0" dur="7s" fill="freeze" />
-          </feDisplacementMap>
-          <feColorMatrix in="mosh1" type="matrix" values="1.2 0 0 0 0  0 1 0 0 0  0 0 1.5 0 0  0 0 0 1 0" result="colors" />
-          <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise2" />
-          <feDisplacementMap in="colors" in2="noise2" scale="0" xChannelSelector="A" yChannelSelector="B" result="mosh2">
-             <animate attributeName="scale" values="0;40;80;20;0" dur="7s" fill="freeze" />
-          </feDisplacementMap>
-          <feConvolveMatrix order="3" kernelMatrix="0 -1 0 -1 5 -1 0 -1 0" in="mosh2" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="600" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
+        <!-- Faster mix for internal content -->
+        <filter id="pixel-mix-filter">
+          <feTurbulence type="turbulence" baseFrequency="0.6" numOctaves="1" result="mixNoise">
+             <animate attributeName="seed" values="1;300" dur="0.1s" repeatCount="indefinite" />
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="mixNoise" scale="35" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </defs>
     </svg>

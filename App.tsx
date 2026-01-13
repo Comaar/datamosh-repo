@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { WaterfallContainer } from './components/WaterfallContainer';
 import { MEDIA_COLLECTION, EXPLOSION_DURATION } from './constants';
 import { MediaItemData, WaterfallState } from './types';
-import { Info, Share2, Command } from 'lucide-react';
 
 const generateInitialItems = (): MediaItemData[] => {
   return MEDIA_COLLECTION.map((item, index) => ({
@@ -24,12 +23,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const initializedItems = generateInitialItems();
-    console.group('Flux Repository: Asset Loading Status');
-    console.log('Total Assets registered:', initializedItems.length);
-    initializedItems.forEach(item => {
-      console.log(`Checking path for ID ${item.id}:`, item.url);
-    });
-    console.groupEnd();
     setItems(initializedItems);
   }, []);
 
@@ -64,23 +57,17 @@ const App: React.FC = () => {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black select-none">
-      <header className="fixed top-0 left-0 w-full z-50 p-6 flex justify-between items-start pointer-events-none">
+      <header className="fixed top-0 left-0 w-full z-[100] p-8 flex justify-between items-start pointer-events-none">
         <div className="pointer-events-auto">
-          <h1 className="text-4xl font-black tracking-tighter uppercase italic text-white/90 mix-blend-difference">
-            Flux Repository
+          <h1 
+            className={`text-5xl font-black tracking-tighter uppercase italic text-white/95 mix-blend-difference transition-all duration-300
+              ${state.isExploding ? 'mosh-pixelated animate-pixel-jitter' : ''}`}
+            style={{ 
+              filter: state.isExploding ? 'url(#pixel-cascade-filter)' : 'none' 
+            }}
+          >
+            MARCO PICCOLO
           </h1>
-          <p className="text-xs font-mono uppercase text-white/40 mt-1">
-            v3.1.2-anchor // protocol_debug_active
-          </p>
-        </div>
-        
-        <div className="flex gap-4 pointer-events-auto">
-          <button className="p-3 bg-white/5 backdrop-blur-md rounded-full border border-white/10 hover:bg-white/20 transition-all group">
-            <Share2 size={18} className="group-hover:scale-110 transition-transform text-white" />
-          </button>
-          <button className="p-3 bg-white/5 backdrop-blur-md rounded-full border border-white/10 hover:bg-white/20 transition-all group">
-            <Info size={18} className="group-hover:scale-110 transition-transform text-white" />
-          </button>
         </div>
       </header>
 
@@ -88,24 +75,14 @@ const App: React.FC = () => {
         <WaterfallContainer items={items} state={state} onToggleLock={toggleLock} />
       )}
 
-      <footer className="fixed bottom-0 left-0 w-full z-50 p-8 flex flex-col md:flex-row justify-between items-end pointer-events-none">
-        <div className="max-w-xs space-y-2 pointer-events-auto bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-white/5">
-          <div className="flex items-center gap-2 text-white/60">
-            <Command size={14} />
-            <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400">Anchor System Online</span>
-          </div>
-          <p className="text-xs text-white/40 leading-relaxed italic">
-            Visual streams are procedurally generated. Click assets to <span className="text-cyan-400">Lock in Position</span>. Space to disrupt temporal flow.
-          </p>
-        </div>
-
-        <div className="mt-4 md:mt-0 flex items-center gap-4 pointer-events-auto">
+      <footer className="fixed bottom-0 left-0 w-full z-50 p-8 flex justify-end items-end pointer-events-none">
+        <div className="flex items-center gap-4 pointer-events-auto">
           <div 
             onClick={triggerExplosion}
-            className={`px-6 py-3 ${state.isExploding ? 'bg-red-500' : 'bg-white'} text-black font-bold text-xs uppercase tracking-widest flex items-center gap-3 rounded-full hover:scale-105 transition-all cursor-pointer`}
+            className={`px-8 py-4 ${state.isExploding ? 'bg-red-500' : 'bg-white'} text-black font-bold text-sm uppercase tracking-[0.2em] flex items-center gap-4 rounded-full hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-[0_0_30px_rgba(255,255,255,0.1)]`}
           >
-            <span>{state.isExploding ? 'Datamoshing...' : 'Trigger Liquid Mosh'}</span>
-            <div className="w-10 h-5 bg-black/10 rounded flex items-center justify-center font-mono text-[10px]">SPACE</div>
+            <span>{state.isExploding ? 'DATAMOSHING' : 'LIQUID MOSH'}</span>
+            <div className="w-12 h-6 bg-black/10 rounded flex items-center justify-center font-mono text-[10px] border border-black/5">SPACE</div>
           </div>
         </div>
       </footer>

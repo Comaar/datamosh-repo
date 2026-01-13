@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { MediaItemData, WaterfallState } from '../types';
 import { MediaItem } from './MediaItem';
@@ -11,26 +10,23 @@ interface Props {
 
 export const WaterfallContainer: React.FC<Props> = ({ items, state, onToggleLock }) => {
   const [offsets, setOffsets] = useState<number[]>(new Array(items.length).fill(-100));
-  // Fix: Provide initial value 0 to satisfy useRef signature requiring 1 argument in strict environments
   const requestRef = useRef<number>(0);
-  // Fix: Provide initial value undefined to satisfy useRef signature and match the undefined check logic in animate
   const lastTimeRef = useRef<number | undefined>(undefined);
 
   const animate = (time: number) => {
     if (lastTimeRef.current !== undefined && !state.isExploding) {
       const deltaTime = time - lastTimeRef.current;
-      const cappedDelta = Math.min(deltaTime, 32); // Prevent huge jumps on tab return
+      const cappedDelta = Math.min(deltaTime, 32); 
       
       setOffsets(prevOffsets => {
         return prevOffsets.map((y, i) => {
           if (items[i].isLocked) return y;
 
           const item = items[i];
-          const speed = item.speed * 0.15 * cappedDelta;
+          const speed = item.speed * 0.18 * cappedDelta;
           let newY = y + speed;
           
-          // Teleport to top (no transition in CSS means no shooting effect)
-          if (newY > 1600) {
+          if (newY > 1500) {
             return -item.height - 400;
           }
           return newY;
@@ -54,10 +50,8 @@ export const WaterfallContainer: React.FC<Props> = ({ items, state, onToggleLock
 
   return (
     <div 
-      className={`relative w-full h-full perspective-1000 transition-all duration-[3000ms] ease-in-out ${state.isExploding ? 'scale-150 rotate-1' : 'scale-100 rotate-0'}`}
-      style={{
-        filter: state.isExploding ? 'url(#datamosh-glitch)' : 'none'
-      }}
+      className={`relative w-full h-full perspective-1000 transition-transform duration-[4000ms] ease-out ${state.isExploding ? 'scale-[1.02]' : 'scale-100'}`}
+      style={{ transformStyle: 'preserve-3d' }}
     >
       {items.map((item, index) => (
         <MediaItem 
@@ -69,10 +63,21 @@ export const WaterfallContainer: React.FC<Props> = ({ items, state, onToggleLock
         />
       ))}
       
-      {/* Background Grid */}
+      {/* Optimized Background Grid */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
-        <div className="w-full h-full" style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '150px 150px' }}></div>
+        <div className="w-full h-full" style={{ 
+          backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', 
+          backgroundSize: '120px 120px',
+        }}></div>
       </div>
+
+      {state.isExploding && (
+        <div className="absolute inset-0 pointer-events-none opacity-[0.05] z-[60] mix-blend-overlay"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+          }}
+        />
+      )}
     </div>
   );
 };

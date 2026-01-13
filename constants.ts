@@ -1,4 +1,3 @@
-
 import { MediaItemData } from './types';
 
 /**
@@ -39,5 +38,5 @@ export const MEDIA_COLLECTION: Partial<MediaItemData>[] = [
   { id: '20', type: 'image', url: 'https://picsum.photos/id/160/600/400' },
 ];
 
-export const EXPLOSION_DURATION = 7000; 
+export const EXPLOSION_DURATION = 4000; 
 export const BASE_FALL_SPEED = 1.5;
