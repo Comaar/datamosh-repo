@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { WaterfallContainer } from './components/WaterfallContainer';
 import { MEDIA_COLLECTION, EXPLOSION_DURATION } from './constants';
@@ -25,11 +24,12 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const initializedItems = generateInitialItems();
-    console.log('App: Media Registry Booted');
-    console.log('App: Initialized items count:', initializedItems.length);
+    console.group('Flux Repository: Asset Loading Status');
+    console.log('Total Assets registered:', initializedItems.length);
     initializedItems.forEach(item => {
-      console.log(`Asset ID: ${item.id} | Type: ${item.type} | URL: ${item.url}`);
+      console.log(`Checking path for ID ${item.id}:`, item.url);
     });
+    console.groupEnd();
     setItems(initializedItems);
   }, []);
 
