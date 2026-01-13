@@ -103,7 +103,7 @@ const App: React.FC = () => {
 
       <footer className="fixed bottom-0 left-0 w-full z-50 p-8 flex justify-end items-end pointer-events-none">
         <div className="bg-white/5 backdrop-blur-md border border-white/10 px-6 py-3 rounded-full flex items-center gap-4 text-[10px] font-mono uppercase tracking-widest text-white/40">
-          <span>Click an item to focus • Cycle repeats once all items shown</span>
+          <span>Click an item to focus</span>
         </div>
       </footer>
     </div>
