@@ -7,16 +7,17 @@ import { MediaItemData } from './types';
 const App: React.FC = () => {
   const [anchoredId, setAnchoredId] = useState<string | null>(null);
 
-  // Normalize the collection once
+  // Normalize the collection once with bigger dimensions
   const items: MediaItemData[] = useMemo(() => {
     return MEDIA_COLLECTION.map((item, index) => ({
       ...item,
       id: item.id || `item-${index}`,
-      width: item.type === 'video' ? 320 : 220 + (index % 5) * 40,
-      height: item.type === 'video' ? 180 : 300 + (index % 3) * 100,
-      initialX: 0, // Will be managed by slots
-      speed: 1,    // Will be managed by slots
-      parallax: 1, // Will be managed by slots
+      // Bigger frames
+      width: item.type === 'video' ? 480 : 350 + (index % 5) * 60,
+      height: item.type === 'video' ? 270 : 450 + (index % 3) * 120,
+      initialX: 0, 
+      speed: 1,    
+      parallax: 1, 
     } as MediaItemData));
   }, []);
 
@@ -26,11 +27,14 @@ const App: React.FC = () => {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black select-none">
-      <header className="fixed top-0 left-0 w-full z-[100] p-8 flex justify-between items-start pointer-events-none">
+      <header className="fixed top-0 left-0 w-full z-[100] p-10 flex flex-col justify-start items-start pointer-events-none">
         <div className="pointer-events-auto">
-          <h1 className="text-5xl font-black tracking-tighter uppercase italic text-white/95 mix-blend-difference">
+          <h1 className="text-6xl font-black tracking-tighter uppercase italic text-white/95 mix-blend-difference">
             MARCO PICCOLO
           </h1>
+          <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-white/50 mt-2 mix-blend-difference max-w-xs leading-relaxed">
+            Nature’s living room, shaped by Seabass togetherness
+          </p>
         </div>
       </header>
 

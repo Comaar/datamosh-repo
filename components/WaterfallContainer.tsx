@@ -65,10 +65,10 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
       const mediaIdx = getNextMediaIndex();
       return {
         id: `slot-${i}`,
-        // Stagger them vertically so they don't all appear at once
-        y: -300 - (i * 500), 
-        x: 5 + Math.random() * 75,
-        speed: 0.7 + Math.random() * 0.8, // Slightly faster base speed
+        // Increased vertical stagger from 500 to 700 to accommodate bigger items
+        y: -400 - (i * 700), 
+        x: 5 + Math.random() * 70, // Slightly narrower X range to keep bigger items from clipping sides too much
+        speed: 0.7 + Math.random() * 0.8, 
         mediaIndex: mediaIdx,
         parallax: 0.9 + Math.random() * 0.3,
       };
@@ -95,14 +95,14 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
         // Skip movement if anchored
         if (mediaItem.id === anchoredId) return;
 
-        // Move DOWN (Y increases) - slightly increased multiplier from 0.04 to 0.065 for "slightly faster" feel
+        // Move DOWN (Y increases)
         const moveAmount = slot.speed * 0.065 * cappedDelta;
         slot.y += moveAmount;
 
-        // Reset if it goes past the bottom
-        if (slot.y > window.innerHeight + 400) {
-          slot.y = -600; // Reset well above the top
-          slot.x = 5 + Math.random() * 75;
+        // Reset if it goes past the bottom (increased threshold for larger items)
+        if (slot.y > window.innerHeight + 800) {
+          slot.y = -900; // Reset well above the top
+          slot.x = 5 + Math.random() * 70;
           slot.mediaIndex = getNextMediaIndex();
           slot.speed = 0.7 + Math.random() * 0.8;
           hasResetted = true;
@@ -148,7 +148,7 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
         <div className="w-full h-full" style={{ 
           backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', 
-          backgroundSize: '150px 150px',
+          backgroundSize: '200px 200px',
         }}></div>
       </div>
     </div>
