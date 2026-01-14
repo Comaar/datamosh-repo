@@ -12,7 +12,7 @@ interface Props {
 export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, onToggleAnchor }, ref) => {
   const [hasError, setHasError] = useState(false);
   
-  // Reset error state when the URL changes (crucial for recycled slots)
+  // Important: Always reset error when URL changes due to pool recycling
   useEffect(() => {
     setHasError(false);
   }, [data.url]);
@@ -21,7 +21,6 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
 
   const handleError = () => {
     if (!hasError) {
-      console.error(`Asset failed to render: ${data.url}`);
       setHasError(true);
     }
   };
@@ -53,23 +52,23 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
       <div 
         className={`w-full h-full relative bg-[#0a0a0a] rounded-lg overflow-hidden border transition-all duration-700 ease-out
           ${isAnchored 
-            ? 'border-[#FF6B00] scale-100 z-[600] shadow-[0_0_50px_rgba(255,107,0,0.15)]' 
+            ? 'border-[#FF6B00] scale-100 z-[600] shadow-[0_0_60px_rgba(255,107,0,0.2)]' 
             : 'border-white/10 scale-100 shadow-2xl group-hover:border-white/30'}`}
       >
         {isAnchored && (
-          <div className="absolute top-3 right-3 z-50 bg-[#FF6B00] text-black p-1 rounded-full shadow-lg pointer-events-none">
-            <Anchor size={12} />
+          <div className="absolute top-3 right-3 z-50 bg-[#FF6B00] text-black p-1.5 rounded-full shadow-lg pointer-events-none">
+            <Anchor size={14} />
           </div>
         )}
 
         {hasError ? (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 p-4 text-center">
-            <AlertCircle className="text-red-500 opacity-30 mb-2" size={24} />
-            <div className="text-[9px] font-mono text-white/30 break-all uppercase tracking-tight leading-tight max-w-[80%]">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 p-6 text-center border-2 border-dashed border-red-500/10">
+            <AlertCircle className="text-red-500/40 mb-3" size={32} strokeWidth={1.5} />
+            <div className="text-[10px] font-mono text-white/30 break-all uppercase tracking-tight leading-tight mb-2">
               {filename}
             </div>
-            <div className="mt-2 px-2 py-0.5 border border-red-500/20 rounded text-[7px] font-mono text-red-500/40 uppercase tracking-widest">
-              RESOURCE NOT FOUND
+            <div className="px-3 py-1 bg-red-500/10 border border-red-500/20 rounded text-[8px] font-mono text-red-500/60 uppercase tracking-widest">
+              404 NOT FOUND
             </div>
           </div>
         ) : (
@@ -84,6 +83,7 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
               />
             ) : (
               <video 
+                key={data.url}
                 src={data.url} 
                 autoPlay 
                 muted 
@@ -92,10 +92,7 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
                 preload="auto"
                 onError={handleError}
                 className="w-full h-full object-cover"
-              >
-                {/* Specific mime-types for .MOV and .MP4 */}
-                <source src={data.url} type={data.url.toLowerCase().endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />
-              </video>
+              />
             )}
           </div>
         )}
