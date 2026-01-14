@@ -9,7 +9,7 @@ const App: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [loadCount, setLoadCount] = useState(0);
 
-  const totalToPreload = Math.min(30, MEDIA_COLLECTION.length);
+  const totalToPreload = Math.min(15, MEDIA_COLLECTION.length); // Reduced initial preload for faster startup
 
   // Normalize the collection
   const items: MediaItemData[] = useMemo(() => {
@@ -17,9 +17,6 @@ const App: React.FC = () => {
       const url = item.url?.toLowerCase() || '';
       const isVideo = url.endsWith('.mp4') || url.endsWith('.mov') || item.type === 'video';
       
-      // Sizing logic: 
-      // Videos are the largest (landscape 16:9 feel)
-      // Images are "slightly smaller" than before
       const width = isVideo ? 760 : 280 + (index % 3) * 30; 
       const height = isVideo ? 428 : 380 + (index % 3) * 40;
 
@@ -35,8 +32,13 @@ const App: React.FC = () => {
     });
   }, []);
 
-  // Preloading logic
+  // Preloading logic with safety timeout
   useEffect(() => {
+    if (totalToPreload === 0) {
+      setIsReady(true);
+      return;
+    }
+
     let mounted = true;
     let loaded = 0;
 
@@ -49,6 +51,13 @@ const App: React.FC = () => {
         }
       }
     };
+
+    // Safety timeout: If after 4 seconds we aren't ready, just show the app anyway
+    const safetyTimer = setTimeout(() => {
+      if (mounted && !isReady) {
+        setIsReady(true);
+      }
+    }, 4000);
 
     items.slice(0, totalToPreload).forEach((item) => {
       if (item.type === 'image') {
@@ -67,8 +76,9 @@ const App: React.FC = () => {
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimer);
     };
-  }, [items, totalToPreload]);
+  }, [items, totalToPreload, isReady]);
 
   const handleToggleAnchor = useCallback((id: string) => {
     setAnchoredId(prev => (prev === id ? null : id));
@@ -84,11 +94,11 @@ const App: React.FC = () => {
           <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
             <div 
               className="h-full bg-[#FF6B00] transition-all duration-300" 
-              style={{ width: `${(loadCount / totalToPreload) * 100}%` }}
+              style={{ width: totalToPreload > 0 ? `${(loadCount / totalToPreload) * 100}%` : '100%' }}
             />
           </div>
           <div className="mt-4 text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">
-            Gathering the living room... {loadCount}/{totalToPreload}
+            Gathering the living room...
           </div>
         </div>
       )}
@@ -114,7 +124,7 @@ const App: React.FC = () => {
 
       <footer className="fixed bottom-0 left-0 w-full z-50 p-8 flex justify-end items-end pointer-events-none">
         <div className="bg-white/5 backdrop-blur-md border border-white/10 px-6 py-3 rounded-full flex items-center gap-4 text-[10px] font-mono uppercase tracking-widest text-white/40">
-          <span>Click an item to focus</span>
+          <span>Click or drag an item</span>
         </div>
       </footer>
     </div>
