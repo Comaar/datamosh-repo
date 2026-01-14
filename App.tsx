@@ -9,7 +9,7 @@ const App: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [loadCount, setLoadCount] = useState(0);
 
-  const totalToPreload = Math.min(15, MEDIA_COLLECTION.length);
+  const totalToLoad = MEDIA_COLLECTION.length;
 
   // Normalize the collection with robust type detection
   const items: MediaItemData[] = useMemo(() => {
@@ -42,68 +42,95 @@ const App: React.FC = () => {
     });
   }, []);
 
-  // Preloading logic
+  // Comprehensive Preloading logic
   useEffect(() => {
-    if (totalToPreload === 0) {
+    if (totalToLoad === 0) {
       setIsReady(true);
       return;
     }
 
     let mounted = true;
-    let loaded = 0;
+    let processedCount = 0;
 
-    const incrementLoad = () => {
-      loaded++;
+    const markAsProcessed = () => {
+      processedCount++;
       if (mounted) {
-        setLoadCount(loaded);
-        if (loaded >= totalToPreload) setIsReady(true);
+        setLoadCount(processedCount);
+        if (processedCount >= totalToLoad) {
+          // Small delay for smooth transition
+          setTimeout(() => {
+            if (mounted) setIsReady(true);
+          }, 500);
+        }
       }
     };
 
-    const safetyTimer = setTimeout(() => {
-      if (mounted && !isReady) setIsReady(true);
-    }, 4000);
+    console.log(`Starting preload for ${totalToLoad} assets...`);
 
-    items.slice(0, totalToPreload).forEach((item) => {
+    items.forEach((item) => {
       if (item.type === 'image') {
         const img = new Image();
+        img.onload = markAsProcessed;
+        img.onerror = () => {
+          console.warn(`[Preload Error] Image not found: ${item.url}`);
+          markAsProcessed();
+        };
         img.src = item.url;
-        img.onload = incrementLoad;
-        img.onerror = incrementLoad;
       } else {
         const video = document.createElement('video');
-        video.src = item.url;
-        video.onloadedmetadata = incrementLoad;
-        video.onerror = incrementLoad;
+        video.onloadedmetadata = markAsProcessed;
+        video.onerror = () => {
+          console.warn(`[Preload Error] Video not found or incompatible: ${item.url}`);
+          markAsProcessed();
+        };
         video.preload = 'metadata';
+        video.src = item.url;
       }
     });
+
+    // Safety timeout: don't get stuck forever if an asset is totally broken
+    const safetyTimer = setTimeout(() => {
+      if (mounted && !isReady) {
+        console.warn("Preload safety timeout reached. Starting app with partial assets.");
+        setIsReady(true);
+      }
+    }, 15000); // 15 seconds max wait
 
     return () => {
       mounted = false;
       clearTimeout(safetyTimer);
     };
-  }, [items, totalToPreload, isReady]);
+  }, [items, totalToLoad]);
 
   const handleToggleAnchor = useCallback((id: string) => {
     setAnchoredId(prev => (prev === id ? null : id));
   }, []);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black select-none">
+    <div className="relative w-full h-screen overflow-hidden bg-[#050505] select-none">
       {!isReady && (
         <div className="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center transition-opacity duration-1000">
-          <div className="text-white font-black text-5xl italic tracking-tighter mb-6 uppercase">
+          <div className="text-white font-black text-5xl italic tracking-tighter mb-2 uppercase">
             MARCO PICCOLO
           </div>
-          <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
+          <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-[#FF6B00] mb-8 animate-pulse">
+            LOADING COLLECTION
+          </div>
+          
+          <div className="w-64 h-1 bg-white/5 rounded-full overflow-hidden relative">
             <div 
-              className="h-full bg-[#FF6B00] transition-all duration-300" 
-              style={{ width: totalToPreload > 0 ? `${(loadCount / totalToPreload) * 100}%` : '100%' }}
+              className="h-full bg-[#FF6B00] transition-all duration-300 ease-out shadow-[0_0_15px_rgba(255,107,0,0.5)]" 
+              style={{ width: `${(loadCount / totalToLoad) * 100}%` }}
             />
           </div>
-          <div className="mt-4 text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">
-            Gathering the living room...
+          
+          <div className="mt-6 flex flex-col items-center gap-1">
+            <div className="text-[9px] font-mono uppercase tracking-widest text-white/30">
+              {loadCount} of {totalToLoad} items verified
+            </div>
+            <div className="text-[7px] font-mono uppercase tracking-[0.2em] text-white/10">
+              Please wait while we prepare the living room
+            </div>
           </div>
         </div>
       )}
@@ -129,7 +156,7 @@ const App: React.FC = () => {
 
       <footer className="fixed bottom-0 left-0 w-full z-50 p-8 flex justify-end items-end pointer-events-none">
         <div className="bg-white/5 backdrop-blur-md border border-white/10 px-6 py-3 rounded-full flex items-center gap-4 text-[10px] font-mono uppercase tracking-widest text-white/40">
-          <span>Click an item</span>
+          <span>Click an item to anchor</span>
         </div>
       </footer>
     </div>

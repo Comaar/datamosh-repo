@@ -21,7 +21,7 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
 
   const handleError = () => {
     if (!hasError) {
-      console.error(`Media failed to load: ${data.url}`);
+      console.error(`Asset failed to render: ${data.url}`);
       setHasError(true);
     }
   };
@@ -51,7 +51,7 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
       style={outerStyle}
     >
       <div 
-        className={`w-full h-full relative bg-zinc-900 rounded-lg overflow-hidden border transition-all duration-700 ease-out
+        className={`w-full h-full relative bg-[#0a0a0a] rounded-lg overflow-hidden border transition-all duration-700 ease-out
           ${isAnchored 
             ? 'border-[#FF6B00] scale-100 z-[600] shadow-[0_0_50px_rgba(255,107,0,0.15)]' 
             : 'border-white/10 scale-100 shadow-2xl group-hover:border-white/30'}`}
@@ -64,12 +64,12 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
 
         {hasError ? (
           <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 p-4 text-center">
-            <AlertCircle className="text-red-500 opacity-40 mb-2" size={24} />
-            <span className="text-[10px] font-mono text-white/40 break-all uppercase tracking-tight">
+            <AlertCircle className="text-red-500 opacity-30 mb-2" size={24} />
+            <div className="text-[9px] font-mono text-white/30 break-all uppercase tracking-tight leading-tight max-w-[80%]">
               {filename}
-            </span>
-            <div className="mt-1 px-2 py-0.5 border border-red-500/20 rounded text-[7px] font-mono text-red-500/60 uppercase">
-              404 NOT FOUND
+            </div>
+            <div className="mt-2 px-2 py-0.5 border border-red-500/20 rounded text-[7px] font-mono text-red-500/40 uppercase tracking-widest">
+              RESOURCE NOT FOUND
             </div>
           </div>
         ) : (
@@ -89,11 +89,11 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
                 muted 
                 loop 
                 playsInline
-                preload="metadata"
+                preload="auto"
                 onError={handleError}
                 className="w-full h-full object-cover"
               >
-                {/* Standard sources for better cross-browser detection */}
+                {/* Specific mime-types for .MOV and .MP4 */}
                 <source src={data.url} type={data.url.toLowerCase().endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />
               </video>
             )}
