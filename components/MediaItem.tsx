@@ -12,11 +12,16 @@ interface Props {
 export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, onToggleAnchor }, ref) => {
   const [hasError, setHasError] = useState(false);
   
+  // Reset error state when the URL changes (crucial for recycled slots)
+  useEffect(() => {
+    setHasError(false);
+  }, [data.url]);
+
   const filename = data.url.split('/').pop() || 'Untitled';
 
   const handleError = () => {
     if (!hasError) {
-      console.error(`Failed to load media: ${data.url}. Check if the file exists in /public/media/ and the filename matches exactly (case-sensitive).`);
+      console.error(`Media failed to load: ${data.url}`);
       setHasError(true);
     }
   };
@@ -57,23 +62,22 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
           </div>
         )}
 
-        <div className="absolute bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-white/80 truncate block">
-            {filename}
-          </span>
-        </div>
-
         {hasError ? (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-black p-4 text-center">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 p-4 text-center">
             <AlertCircle className="text-red-500 opacity-40 mb-2" size={24} />
-            <span className="text-[8px] font-mono text-white/20 break-all">{filename}</span>
+            <span className="text-[10px] font-mono text-white/40 break-all uppercase tracking-tight">
+              {filename}
+            </span>
+            <div className="mt-1 px-2 py-0.5 border border-red-500/20 rounded text-[7px] font-mono text-red-500/60 uppercase">
+              404 NOT FOUND
+            </div>
           </div>
         ) : (
           <div className="w-full h-full pointer-events-none">
             {data.type === 'image' ? (
               <img 
                 src={data.url} 
-                alt="" 
+                alt={filename}
                 onError={handleError}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -85,10 +89,13 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
                 muted 
                 loop 
                 playsInline
-                preload="auto"
+                preload="metadata"
                 onError={handleError}
                 className="w-full h-full object-cover"
-              />
+              >
+                {/* Standard sources for better cross-browser detection */}
+                <source src={data.url} type={data.url.toLowerCase().endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />
+              </video>
             )}
           </div>
         )}

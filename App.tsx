@@ -2,27 +2,37 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { WaterfallContainer } from './components/WaterfallContainer';
 import { MEDIA_COLLECTION } from './constants';
-import { MediaItemData } from './types';
+import { MediaItemData, MediaType } from './types';
 
 const App: React.FC = () => {
   const [anchoredId, setAnchoredId] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [loadCount, setLoadCount] = useState(0);
 
-  const totalToPreload = Math.min(15, MEDIA_COLLECTION.length); // Reduced initial preload for faster startup
+  const totalToPreload = Math.min(15, MEDIA_COLLECTION.length);
 
-  // Normalize the collection
+  // Normalize the collection with robust type detection
   const items: MediaItemData[] = useMemo(() => {
     return MEDIA_COLLECTION.map((item, index) => {
-      const url = item.url?.toLowerCase() || '';
-      const isVideo = url.endsWith('.mp4') || url.endsWith('.mov') || item.type === 'video';
+      const url = item.url || '';
+      const lowerUrl = url.toLowerCase();
       
+      // If type isn't explicitly provided, guess from extension
+      let detectedType: MediaType = item.type as MediaType;
+      if (!detectedType) {
+        detectedType = (lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov') || lowerUrl.endsWith('.webm')) 
+          ? 'video' 
+          : 'image';
+      }
+
+      const isVideo = detectedType === 'video';
       const width = isVideo ? 760 : 280 + (index % 3) * 30; 
       const height = isVideo ? 428 : 380 + (index % 3) * 40;
 
       return {
         ...item,
         id: item.id || `item-${index}`,
+        type: detectedType,
         width,
         height,
         initialX: 0, 
@@ -32,7 +42,7 @@ const App: React.FC = () => {
     });
   }, []);
 
-  // Preloading logic with safety timeout
+  // Preloading logic
   useEffect(() => {
     if (totalToPreload === 0) {
       setIsReady(true);
@@ -46,17 +56,12 @@ const App: React.FC = () => {
       loaded++;
       if (mounted) {
         setLoadCount(loaded);
-        if (loaded >= totalToPreload) {
-          setIsReady(true);
-        }
+        if (loaded >= totalToPreload) setIsReady(true);
       }
     };
 
-    // Safety timeout: If after 4 seconds we aren't ready, just show the app anyway
     const safetyTimer = setTimeout(() => {
-      if (mounted && !isReady) {
-        setIsReady(true);
-      }
+      if (mounted && !isReady) setIsReady(true);
     }, 4000);
 
     items.slice(0, totalToPreload).forEach((item) => {
@@ -68,9 +73,9 @@ const App: React.FC = () => {
       } else {
         const video = document.createElement('video');
         video.src = item.url;
-        video.onloadeddata = incrementLoad;
+        video.onloadedmetadata = incrementLoad;
         video.onerror = incrementLoad;
-        video.preload = 'auto';
+        video.preload = 'metadata';
       }
     });
 
