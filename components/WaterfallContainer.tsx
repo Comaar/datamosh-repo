@@ -71,16 +71,6 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
     setSlots(initialSlots);
   }, [items.length]);
 
-  const handleManualMove = useCallback((slotId: string, newX: number, newY: number) => {
-    const slotIndex = slotsRef.current.findIndex(s => s.id === slotId);
-    if (slotIndex !== -1) {
-      slotsRef.current[slotIndex].x = newX;
-      slotsRef.current[slotIndex].y = newY;
-      // We don't call setSlots here to avoid 60fps React renders during drag, 
-      // but the ref is updated so the animation loop and next render will pick it up.
-    }
-  }, []);
-
   const animate = useCallback((time: number) => {
     if (lastTimeRef.current !== undefined) {
       const deltaTime = time - lastTimeRef.current;
@@ -95,11 +85,7 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
         
         if (!element || !mediaItem) return;
         
-        // If anchored, skip physics movement but sync the DOM if needed 
-        // (though manual move already updates DOM directly)
         if (mediaItem.id === anchoredId) {
-            // Keep the element at its current slot position (which might be being updated by a drag)
-            element.style.left = `${slot.x}%`;
             element.style.transform = `translate3d(0, ${slot.y}px, 0)`;
             return;
         }
@@ -107,7 +93,6 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
         const moveAmount = slot.speed * 0.08 * cappedDelta;
         slot.y += moveAmount;
 
-        // Recycle slots
         if (slot.y > window.innerHeight + 1000) {
           slot.y = -800; 
           slot.x = 5 + Math.random() * 70;
@@ -147,7 +132,6 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
             data={{ ...item, initialX: slot.x, parallax: slot.parallax, initialY: slot.y }} 
             isAnchored={item.id === anchoredId}
             onToggleAnchor={() => onToggleAnchor(item.id)}
-            onManualMove={(nx, ny) => handleManualMove(slot.id, nx, ny)}
           />
         );
       })}
