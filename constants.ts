@@ -1,24 +1,7 @@
 
 import { MediaItemData } from './types';
 
-/**
- * INSTRUCTIONS FOR ADDING YOUR OWN MEDIA:
- * 1. Create a folder named 'public' in your project root.
- * 2. Create a folder named 'media' inside 'public'.
- * 3. Drop your images/videos into 'public/media/'.
- * 4. Use the relative path '/media/filename.ext' below.
- */
-
 export const MEDIA_COLLECTION: Partial<MediaItemData>[] = [
-  // CORRECTED: This uses the relative path served by the web server
-  { id: 'user-asset-1', type: 'image', url: '/media/6F3B9312-3316-4D24-BD4E-040EDDF38AC6.JPG' },
-  
-  // Placeholder for your other local files
-  // { id: 'local-video', type: 'video', url: '/media/my-video.mp4' },
-
-  // Cloud Samples
-  // Local assets served from /public/media
-
   { id: 'media-1', type: 'video', url: '/media/-1407286870195711639.MP4' },
   { id: 'media-2', type: 'video', url: '/media/35f7394130de465881d33a420ff107bd.MP4' },
   { id: 'media-3', type: 'image', url: '/media/3CFB475E-7E14-497D-AA69-65C4EAD390B0.JPG' },
@@ -73,7 +56,6 @@ export const MEDIA_COLLECTION: Partial<MediaItemData>[] = [
   { id: 'media-52', type: 'image', url: '/media/P1097223.JPG' },
   { id: 'media-53', type: 'image', url: '/media/b1abdbcb-24e7-4f14-ac54-7adc603ab383.JPG' },
   { id: 'media-54', type: 'image', url: '/media/c1854a63-0ea3-4c1f-814f-3d03bcb036a9.JPG' },
-
 ];
 
 export const EXPLOSION_DURATION = 4000; 

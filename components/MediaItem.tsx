@@ -1,5 +1,5 @@
 
-import React, { useState, forwardRef } from 'react';
+import React, { useState, forwardRef, useEffect } from 'react';
 import { MediaItemData } from '../types';
 import { Anchor, AlertCircle } from 'lucide-react';
 
@@ -12,8 +12,14 @@ interface Props {
 export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, onToggleAnchor }, ref) => {
   const [hasError, setHasError] = useState(false);
   
-  // Extract filename from the URL
   const filename = data.url.split('/').pop() || 'Untitled';
+
+  const handleError = () => {
+    if (!hasError) {
+      console.error(`Failed to load media: ${data.url}. Check if the file exists in /public/media/ and the filename matches exactly (case-sensitive).`);
+      setHasError(true);
+    }
+  };
 
   const outerStyle: React.CSSProperties = {
     position: 'absolute',
@@ -51,7 +57,6 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
           </div>
         )}
 
-        {/* Filename Overlay */}
         <div className="absolute bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
           <span className="text-[10px] font-mono uppercase tracking-widest text-white/80 truncate block">
             {filename}
@@ -59,8 +64,9 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
         </div>
 
         {hasError ? (
-          <div className="w-full h-full flex items-center justify-center bg-black">
-            <AlertCircle className="text-red-500 opacity-20" size={24} />
+          <div className="w-full h-full flex flex-col items-center justify-center bg-black p-4 text-center">
+            <AlertCircle className="text-red-500 opacity-40 mb-2" size={24} />
+            <span className="text-[8px] font-mono text-white/20 break-all">{filename}</span>
           </div>
         ) : (
           <div className="w-full h-full pointer-events-none">
@@ -68,7 +74,7 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
               <img 
                 src={data.url} 
                 alt="" 
-                onError={() => setHasError(true)}
+                onError={handleError}
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
@@ -79,7 +85,8 @@ export const MediaItem = forwardRef<HTMLDivElement, Props>(({ data, isAnchored, 
                 muted 
                 loop 
                 playsInline
-                onError={() => setHasError(true)}
+                preload="auto"
+                onError={handleError}
                 className="w-full h-full object-cover"
               />
             )}

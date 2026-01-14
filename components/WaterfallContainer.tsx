@@ -18,7 +18,7 @@ interface Props {
   onToggleAnchor: (id: string) => void;
 }
 
-const SLOT_COUNT = 7; 
+const SLOT_COUNT = 14; 
 
 export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggleAnchor }) => {
   const [slots, setSlots] = useState<SlotData[]>([]);
@@ -59,9 +59,9 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
       const mediaIdx = getNextMediaIndex();
       return {
         id: `slot-${i}`,
-        y: (i * 300) - 400, 
-        x: 5 + Math.random() * 70,
-        speed: 0.8 + Math.random() * 0.7, 
+        y: (i * (window.innerHeight / (SLOT_COUNT / 2))) - 400, 
+        x: (i % 2 === 0 ? 5 : 50) + Math.random() * 35,
+        speed: 0.6 + Math.random() * 0.9, 
         mediaIndex: mediaIdx,
         parallax: 0.9 + Math.random() * 0.3,
       };
@@ -93,11 +93,11 @@ export const WaterfallContainer: React.FC<Props> = ({ items, anchoredId, onToggl
         const moveAmount = slot.speed * 0.08 * cappedDelta;
         slot.y += moveAmount;
 
-        if (slot.y > window.innerHeight + 1000) {
+        if (slot.y > window.innerHeight + 800) {
           slot.y = -800; 
-          slot.x = 5 + Math.random() * 70;
+          slot.x = 5 + Math.random() * 80;
           slot.mediaIndex = getNextMediaIndex();
-          slot.speed = 0.8 + Math.random() * 0.7;
+          slot.speed = 0.6 + Math.random() * 0.9;
           needsStateUpdate = true;
           element.style.left = `${slot.x}%`;
         }
